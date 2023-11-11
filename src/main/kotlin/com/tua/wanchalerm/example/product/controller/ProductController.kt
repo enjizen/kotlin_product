@@ -18,12 +18,17 @@ class ProductController(private val productService: ProductService) {
 
     @GetMapping("/products")
     fun get() : Flux<ProductEntity> {
-        productService.get()
-        return productService.get()
+        productService.getByName()
+        return productService.getByName()
     }
 
     @GetMapping("/products/{id}")
     fun getById(@PathVariable("id") id: Int) : Mono<ProductEntity> {
         return productService.getById(id)
+    }
+
+    @GetMapping("/products/name")
+    fun getByName(@RequestParam("name") name: String) : Mono<ProductEntity> {
+        return productService.getByName(name)
     }
 }
