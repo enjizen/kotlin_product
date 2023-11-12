@@ -19,17 +19,11 @@ class ProductService(private val productRepository: ProductRepository) {
         return productRepository.findAll()
     }
 
-    fun getByName(name: String?): Mono<ProductEntity> {
-        name?.let {
-            return productRepository.findByName(it)
-        } ?: run {
-            return Mono.empty()
-        }
-    }
-
     fun getById(id: Int): Mono<ProductEntity> {
         return productRepository.findById(id)
-            .switchIfEmpty { throw DataNotFoundException(message = "Bad request", description = "Product id $id not found") }
+            .switchIfEmpty {
+                throw DataNotFoundException(message = "Bad request", description = "Product id $id not found")
+            }
     }
 
 

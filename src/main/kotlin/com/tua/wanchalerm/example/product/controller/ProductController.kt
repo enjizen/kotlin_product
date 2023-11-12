@@ -26,9 +26,4 @@ class ProductController(private val productService: ProductService) {
     fun getById(@PathVariable("id") id: Int) : Mono<ProductEntity> {
         return productService.getById(id)
     }
-
-    @GetMapping("/products/name")
-    fun getByName(@RequestParam("name") name: String) : Mono<ProductEntity> {
-        return productService.getByName(name)
-    }
 }
