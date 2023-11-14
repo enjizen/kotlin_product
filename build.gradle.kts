@@ -30,6 +30,8 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-config")
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 	implementation("org.springframework.cloud:spring-cloud-starter-bootstrap")
+	implementation("jakarta.validation:jakarta.validation-api:3.0.2")
+	implementation("org.apache.commons:commons-lang3:3.13.0")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	runtimeOnly("io.asyncer:r2dbc-mysql")
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")

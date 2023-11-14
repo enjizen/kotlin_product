@@ -12,7 +12,8 @@ import reactor.core.publisher.Mono
 class ProductController(private val productService: ProductService) {
 
     @PostMapping("/products")
-    fun create(@RequestBody request: ProductRequest) : Mono<ProductEntity> {
+    fun create(@RequestBody request: ProductRequest,
+               @RequestHeader("user-id") userId: String) : Mono<ProductEntity> {
         return productService.create(request)
     }
 
