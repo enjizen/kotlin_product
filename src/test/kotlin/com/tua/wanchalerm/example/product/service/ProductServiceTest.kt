@@ -30,7 +30,7 @@ class ProductServiceTest {
         productEntity.name = "test"
         val productEntityFlux = Flux.just(productEntity)
         Mockito.`when`(productRepository?.findAll()).thenReturn(productEntityFlux)
-        val result = productService?.getByName()
+        val result = productService?.getAll()
         assertNotNull(result)
         assertEquals("12344565645", result!!.blockFirst()!!.code)
         Mockito.verify(productRepository, Mockito.times(1))!!.findAll()
@@ -62,7 +62,7 @@ class ProductServiceTest {
         productEntity.code = "12344565645"
         productEntity.name = "test"
         Mockito.`when`(productRepository!!.findByName(Mockito.anyString())).thenReturn(Mono.just(productEntity))
-        val result = productService?.getByName("test")
+        val result = productService?.getAll("test")
         assertNotNull(result)
         assertEquals("12344565645", result!!.block()!!.code)
         Mockito.verify(productRepository, Mockito.times(1))!!.findByName(Mockito.anyString())

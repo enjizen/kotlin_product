@@ -15,20 +15,22 @@ import com.tua.wanchalerm.example.product.model.common.ResponseStatus
 import jakarta.validation.ConstraintViolationException
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.entity.ContentType
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.HttpMediaTypeException
 import org.springframework.web.bind.*
-import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import reactor.core.publisher.Mono
 import java.util.*
 
-@ControllerAdvice
+@RestControllerAdvice
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 class ExceptionHandler {
 
     @ExceptionHandler(
@@ -36,9 +38,11 @@ class ExceptionHandler {
         HttpMediaTypeException::class,
         HttpMessageNotReadableException::class,
         MissingRequestHeaderException::class,
+        MissingRequestValueException::class,
         ServletRequestBindingException::class,
         MethodArgumentTypeMismatchException::class
     )
+    @ResponseBody
     fun handleJsonParseException(ex: Exception): Mono<ResponseEntity<ResponseStatus>> {
         val description = getDescription(ex)
         val responseStatus = ResponseStatus(BAD_REQUEST, description)
@@ -53,30 +57,25 @@ class ExceptionHandler {
         MethodArgumentNotValidException::class,
         ConstraintViolationException::class
     )
+    @ResponseBody
     fun handleBadRequest(ex: Exception): Mono<ResponseEntity<ResponseStatus>> {
         val errorMap = TreeMap<String, String>()
 
         if (ex is MethodArgumentNotValidException) {
             ex.bindingResult.fieldErrors.forEach { error ->
                 val errorDescription = if (error.rejectedValue == null) FIELD_IS_MISSING else FIELD_IS_INVALID
-                error.field.camelToSnake()
-                    .let { errorMap[it] = String.format(errorDescription, it) }
+                error.field.camelToSnake().let { errorMap[it] = String.format(errorDescription, it) }
             }
 
             ex.bindingResult.globalErrors.forEach { error ->
-                val errorDescription =
-                    if (error.defaultMessage?.contains("null")!!) FIELD_IS_MISSING else FIELD_IS_INVALID
-                error.objectName.camelToSnake().let {
-                    errorMap[it] = String.format(errorDescription, it)
-                }
+                val errorDescription = if (error.defaultMessage?.contains("null")!!) FIELD_IS_MISSING else FIELD_IS_INVALID
+                error.objectName.camelToSnake().let {errorMap[it] = String.format(errorDescription, it) }
             }
         }
 
         (ex as? ConstraintViolationException)?.constraintViolations?.forEach { error ->
-            val errorDescription =
-                if (null == error.invalidValue) FIELD_IS_MISSING else FIELD_IS_INVALID
-            val paths =
-                StringUtils.split(error.propertyPath.toString(), ".")
+            val errorDescription = if (null == error.invalidValue) FIELD_IS_MISSING else FIELD_IS_INVALID
+            val paths = StringUtils.split(error.propertyPath.toString(), ".")
             val fieldNameSnakeCase: String = paths[paths.size - 1].camelToSnake()
             errorMap[fieldNameSnakeCase] = String.format(errorDescription, fieldNameSnakeCase)
         }
@@ -96,19 +95,24 @@ class ExceptionHandler {
                 val cause = exception.cause as JsonMappingException
                 String.format(FIELD_IS_INVALID, referencesToFields(cause.path))
             }
+
             exception.cause is InvalidFormatException -> {
                 val cause = exception.cause as InvalidFormatException
                 String.format(FIELD_IS_INVALID, referencesToFields(cause.path))
             }
+
             exception is MissingServletRequestParameterException -> {
                 String.format(FIELD_IS_MISSING, exception.parameterName)
             }
+
             exception is MissingPathVariableException -> {
                 String.format(FIELD_IS_MISSING, exception.variableName)
             }
+
             exception is MethodArgumentTypeMismatchException -> {
                 String.format(FIELD_IS_INVALID, exception.name)
             }
+
             else -> DEFAULT_MESSAGE
         }
 
