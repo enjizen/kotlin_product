@@ -14,34 +14,34 @@ import java.time.LocalDateTime
 
 @Table(name = "products")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
- class ProductEntity : Serializable {
+open class ProductEntity  {
    @Id
-   var id: Int? = null
+   open var id: Int? = null
 
    @Column("code")
-   var code: String? = null
+   open var code: String? = null
 
    @Column("name")
-   var name: String? = null
+   open var name: String? = null
 
    @Column("description")
-   var description: String? = null
+   open var description: String? = null
 
    @Column("price")
-   var price: BigDecimal? = BigDecimal("0.00")
+   open var price: BigDecimal? = BigDecimal("0.00")
 
    @Column("inventory_quantity")
-   var inventoryQuantity: Int? = 0
+   open var inventoryQuantity: Int? = 0
 
    @Column("created_date_time")
    @CreatedDate
-   var createdDateTime: LocalDateTime? = null
+   open var createdDateTime: LocalDateTime? = null
 
    @Column("updated_date_time")
    @LastModifiedDate
-   var updatedDateTime: LocalDateTime? = null
+   open var updatedDateTime: LocalDateTime? = null
 
    @Column("is_deleted")
    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-   var isDeleted: Boolean? = false
+   open var isDeleted: Boolean? = false
 }

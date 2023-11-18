@@ -19,7 +19,6 @@ class ProductController(private val productService: ProductService) {
 
     @GetMapping("/products")
     fun get(@RequestHeader("user-id") userId: String) : Flux<ProductEntity> {
-        productService.getAll()
         return productService.getAll()
     }
 
